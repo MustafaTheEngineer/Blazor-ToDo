@@ -1,0 +1,138 @@
+﻿@page "/"
+
+@* <PageTitle>Home</PageTitle> *@
+
+<div class="container-fluid text-center">
+    <div class="row">
+        @for (int i = 0; i < TodoListesi.Length; i++)
+        {
+
+            var localI = i;
+
+            <div class="col">
+                <h4> @TodoListesi[localI].ListeAdi </h4>
+                <hr />
+
+
+                <div class="input-group">
+                    <InputText @bind-Value="TodoListesi[localI].TodoInput" class="w-75" id="yapacaklarim" aria-describedby="yapacaklarim"></InputText>
+                    <button class="btn btn-outline-secondary w-25" type="button" id="yapacaklarim" @onclick="() => TodoListesi[localI].listeyeEkle(TodoListesi[localI].TodoInput)">Ekle</button>
+                </div>
+
+
+                <div class="d-flex flex-column text-start w-100">
+                    @for (int index = 0; index < TodoListesi[localI].TodoList.Count; index++)
+                    {
+                        var localIndex = index;
+
+                        @if (localIndex != TodoListesi[localI].TodoDuzenle)
+                        {
+                            <div class="my-2 input-group w-100">
+                                <button @onclick="() => TodoListesi[localI].listeDuzenle(localIndex)" type="button" class="btn btn-outline-secondary" style="flex-grow: 1">@TodoListesi[localI].TodoList[localIndex]</button>
+                                <button class="btn btn-outline-secondary">
+                                    <img src="images/trash.svg" />
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" @onclick="() => TodoListesi[localI].SolaGecir(localIndex)">
+                                    <img src="@TodoListesi[localI].SolImg" />
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" @onclick="() => TodoListesi[localI].SagaGecir(localIndex)">
+                                    <img src="@TodoListesi[localI].SagImg" />
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="input-group">
+                                <input @bind-value="@TodoListesi[localI].TodoList[localIndex]"></input>
+                                <button @onclick="() => Liste.yapacaklarimDuzenleSifirla(TodoListesi[localI])" class="btn btn-outline-secondary" type="button">Button</button>
+                            </div>
+                        }
+                    }
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+
+    class Liste
+    {
+
+        public string ListeAdi;
+        public List<string> TodoList = [];
+
+        public int TodoDuzenle = -1;
+        public string TodoDuzenleInput = "";
+
+        public string TodoInput = "";
+
+        public Liste SolListe = null!;
+        public string SolImg;
+
+        public Liste SagListe = null!;
+        public string SagImg;
+
+
+        public Liste(string listeAdi,string solImg, string sagImg)
+        {
+            this.ListeAdi = listeAdi;
+            this.SolImg = solImg;
+            this.SagImg = sagImg;
+        }
+
+        public void SolSagListe(Liste SolListe,Liste SagListe)
+        {
+            this.SolListe = SolListe;
+            this.SagListe = SagListe;
+        }
+
+        public void listeyeEkle(string input)
+        {
+            TodoList.Add(input);
+        }
+
+        public void Cikar(int index)
+        {
+
+        }
+
+        public void SolaGecir(int index)
+        {
+            SolListe.listeyeEkle(TodoList[index]);
+            TodoList.RemoveAt(index);
+        }
+
+        public void SagaGecir(int index)
+        {
+            SagListe.listeyeEkle(TodoList[index]);
+            TodoList.RemoveAt(index);
+        }
+
+        public static void yapacaklarimDuzenleSifirla(Liste toDoList)
+        {
+            toDoList.TodoDuzenle = -1;
+        }
+
+        public void listeDuzenle(int index)
+        {
+            TodoDuzenle = index;
+            TodoDuzenleInput = TodoList[TodoDuzenle];
+        }
+    }
+
+    private Liste[] TodoListesi = [
+        new Liste("Yapacaklarım", "images/book.svg", "images/check.svg"),
+        new Liste("Yapıyorum", "images/list-check.svg", "images/check.svg"),
+        new Liste("Yaptım", "images/list-check.svg", "images/book.svg")
+    ];
+
+    protected override void OnInitialized()
+    {
+        TodoListesi[0].SolSagListe(TodoListesi[1], TodoListesi[2]);
+        TodoListesi[1].SolSagListe(TodoListesi[0], TodoListesi[2]);
+        TodoListesi[2].SolSagListe(TodoListesi[0], TodoListesi[1]);
+    }
+
+}
